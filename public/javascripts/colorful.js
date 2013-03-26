@@ -14,7 +14,7 @@ var canvas = document.getElementById("canvas"),
 		n = 0; // Counter
 
 // Declare constants
-var FPS = 15, // Frame rate
+var FPS = 24, // Frame rate
 	FRAME_MSEC = 1000 / FPS >> 0, // Interval time
 	CENTER_X = canvas.width / 2,
 	CENTER_Y = canvas.height / 2,
@@ -22,6 +22,9 @@ var FPS = 15, // Frame rate
 
 // Registration of event handlers
 setInterval(intervalHandler, FRAME_MSEC);
+
+//context.lineWidth = 15;
+context.lineCap = "round";
 
 function intervalHandler(){
 	var oldX = CENTER_X, oldY = CENTER_Y, i;
@@ -32,6 +35,7 @@ function intervalHandler(){
   for (i = 0; i <= MAX; i++) {
     context.beginPath();
 		
+    //context.strokeStyle = "ivory";
     context.strokeStyle = getColorHSV(i / MAX*360 + n*4000);
 		
     context.moveTo(oldX, oldY);

@@ -1,73 +1,76 @@
-/**
- * Colorful Lines
- * 
- * @author clockmaker
- * @see http://clockmaker.jp/blog/
- * 
- * forked from wonderfl
- * http://wonderfl.net/c/qlFz
- */
+//circles.js
 
-// Declare variables
-var canvas = document.getElementById("canvas"), 
-		context = canvas.getContext("2d"),
-		n = 0; // Counter
+Circles = function(x, y, ctx){
+	this.radius = {
+		val: 0,
+		increment: 1,
+		increase: true
+	},
+	this.shade = {
+		val: 0,
+		increment: 1,
+		increase: true
+	},
+	distance = function(x1, y1, x2, y2){
+		return Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+	},
+	this.x = x;
+	this.y = y;
+	this.ctx = ctx;
+	this.maxRadius = Math.floor(Math.max(
+		distance(x, y, 0, 0),
+		distance(x, y, this.ctx.canvas.width, 0),
+		distance(x, y, 0, this.ctx.canvas.height),
+		distance(x, y, this.ctx.canvas.width, this.ctx.canvas.height)
+	));
+};
+Circles.prototype = {
+	draw: function(){
+		this.radius.val = 0;
 
-// Declare constants
-var FPS = 24, // Frame rate
-	FRAME_MSEC = 1000 / FPS >> 0, // Interval time
-	CENTER_X = canvas.width / 2,
-	CENTER_Y = canvas.height / 2,
-	MAX = 500; // Loop count
+		(this.radius.increase) ? this.radius.increment += 2 : this.radius.increment -= 2;
+		if(this.radius.increment >= 200) this.radius.increase = false;
+		if(this.radius.increment <= 1) this.radius.increase = true;
 
-// Registration of event handlers
-setInterval(intervalHandler, FRAME_MSEC);
+		while(this.radius.val <= this.maxRadius){
+			this.radius.val += this.radius.increment;
 
-function intervalHandler(){
-	var oldX = CENTER_X, oldY = CENTER_Y, i;
-	
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Drawing the pattern
-  for (i = 0; i <= MAX; i++) {
-    context.beginPath();
-		
-    //context.strokeStyle = getColorHSV(i/MAX *360 + n*5000);
-    context.strokeStyle = "#ccc";
-		
-    context.moveTo(oldX, oldY);
-    context.lineTo(
-      oldX = CENTER_X + (i * Math.cos(i + (i * n))), 
-      oldY = CENTER_Y + (i * Math.sin(i + (i * n))));
-    context.stroke();
-  }
-  
-  // counter update
-  n += .00025;
+			(this.shade.increase) ? this.shade.val += this.shade.increment : this.shade.val -= this.shade.increment;
+			if(this.shade.val >= 255) this.shade.increase = false;
+			if(this.shade.val <= 0) this.shade.increase = true;
+
+			this.ctx.beginPath();
+			//this.ctx.strokeStyle = "rgb(" + this.shade.val + "," + this.shade.val + "," + this.shade.val +")";
+
+			// ctx.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+			this.ctx.arc(this.x, this.y, this.radius.val, 0, Math.PI * 2, false);
+			this.ctx.moveTo(this.x + this.radius.val, this.y + this.radius.val);
+
+			this.ctx.stroke();
+		};
+	}
 }
 
-// -----------------------------------------
-// Utility functions
-// -----------------------------------------
+window.onload = function(){
+	var gr = 1.61803398875,
+		canvas = document.getElementById("canvas"),
+		ctx = canvas.getContext("2d"),
+		FPS = 24,
+		FRAME_MSEC = 1000 / FPS >> 0;
 
-/**
- * HSV
- * @param {Number} h
- * @return {String} "rgb(r, b, g)"
- */
-function getColorHSV(h){
-  var ht = (((h %= 360) < 0) ? h + 360 : h) / 60,
-		hi = Math.floor(ht),
-		r, g, b,
-		f = Math.round;
-	
-  switch (hi) {
-    case 0: r = 0xff; g = f(0xff *(ht-hi));     b = 0; break;
-    case 1: g = 0xff; r = f(0xff *(1-(ht-hi))); b = 0; break;
-    case 2: g = 0xff; b = f(0xff *(ht-hi));     r = 0; break;
-    case 3: b = 0xff; g = f(0xff *(1-(ht-hi))); r = 0; break;
-    case 4: b = 0xff; r = f(0xff *(ht-hi));     g = 0; break;
-    case 5: r = 0xff; b = f(0xff *(1-(ht-hi))); g = 0; break;
-  }
-  return "rgb(" + r + ", " + g + ", " + b + ")";
-}
+	var c1 = new Circles(canvas.height/2, canvas.width/2, ctx)
+		, c2 = new Circles(0, 0, ctx)
+		, c3 = new Circles(canvas.height, canvas.width, ctx)
+		, c4 = new Circles(canvas.width, 0, ctx)
+		, c5 = new Circles(0, canvas.height, ctx)
+	; setInterval(intervalHandler, FRAME_MSEC);
+
+	function intervalHandler(){
+		ctx.clearRect(0, 0, canvas.height, canvas.width);
+		c1.draw.call(c1);
+		c2.draw.call(c2);
+		c3.draw.call(c3);
+		c4.draw.call(c4);
+		c5.draw.call(c5);
+	};
+};
